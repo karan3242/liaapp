@@ -81,7 +81,7 @@ data.base.function <- function(dat) {
   sign1corrected <- function (x, makeplot = FALSE, qcrit = 0.975, ...) {
     p <- ncol(x)
     n <- nrow(x)
-    x.mad = apply(x, 2, mad)
+    x.mad <- apply(x, 2, mad)
     if (any(x.mad == 0))
       stop("More than 50% equal values in one or more variables!")
     x.sc <- scale(x, apply(x, 2, median), x.mad)
