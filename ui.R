@@ -1,3 +1,6 @@
+#
+
+
 
 library(shiny)
 
@@ -156,22 +159,22 @@ shinyUI(fluidPage(
   ),
   
   
-  # fluidPage(style="padding-top: 80px;",
-  #           
-  #           absolutePanel(
-  #             top=667, left = 628, width = 400,
-  #             draggable = TRUE,
-  #             wellPanel(
-  #               HTML(markdownToHTML(fragment.only=TRUE, text=c("Summary Table"))
-  #                    ),
-  #               fluidRow(column(3,tableOutput("countrySummary")),
-  #                        column(2),
-  #                        column(3,tableOutput("regionSummary")))
-  #               ),
-  #               
-  #             
-  #             style = "opacity: 0.92"
-  #           ))
+  fluidPage(style="padding-top: 80px;",
+            
+            absolutePanel(
+              top=667, left = 628, width = 400,
+              draggable = TRUE,
+              wellPanel(
+                HTML(markdownToHTML(fragment.only=TRUE, text=c("Summary Table"))
+                     ),
+                fluidRow(column(3,tableOutput("countrySummary")),
+                         column(2),
+                         column(3,tableOutput("regionSummary")))
+                ),
+                
+              
+              style = "opacity: 0.92"
+            ))
   
   
   
