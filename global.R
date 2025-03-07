@@ -18,7 +18,7 @@ library("markdown")
 library("DT")
 
 # changed the database from "a" to "dat" (need to fix that ANNOYING 1st column)
-path <- "C:\\Users\\User\\Dropbox\\LIA database\\App\\LIA database\\app 2019\\database.xlsx"
+path <- "database.xlsx"
 
 dat <- suppressWarnings(read_excel(path = path))
 # these are all problems we need to address. I took them out because they annoy me.
