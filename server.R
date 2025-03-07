@@ -81,7 +81,7 @@ shinyServer(function(input, output, session) {
       # the given observations.
       obs <- c(input$x1,input$x2,input$x3) 
       # the database observations.
-      datobs <- cbind(dat$`208/204 pb`,dat$`207/204 pb`,dat$`206Pb/204Pb`)
+      datobs <- cbind(dat$`208/204Pb`,dat$`207/204Pb`,dat$`206Pb/204Pb`)
       # run "euc" on the table with a refrence to the given observation, and give the 5 closest observations.
       distance <- apply(X=datobs,MARGIN = 1,FUN = euc,x=obs)
       place<-order(distance,decreasing=FALSE)[1:input$numobs]
@@ -107,7 +107,7 @@ shinyServer(function(input, output, session) {
       # this function copies the process of asingle observation.
       eucTable <- function(vec){
         
-        datobs<-cbind(dat$`208/204 pb`,dat$`207/204 pb`,dat$`206Pb/204Pb`)
+        datobs<-cbind(dat$`208/204Pb`,dat$`207/204Pb`,dat$`206Pb/204Pb`)
         
         distance <- apply(X=datobs,MARGIN = 1,FUN = euc,x=vec)
         
@@ -187,7 +187,7 @@ shinyServer(function(input, output, session) {
     tabeuc <- tableEuclidean()
     
     datatable(tabeuc, options = list(lengthMenu = list(c(5,10,15,20), c('5','10','15','20')), pageLength = 15,paging = TRUE,searching =TRUE), rownames = rep("",times = nrow(tabeuc))) %>% 
-      formatRound(c("distance","208/204 pb","207/204 pb","206Pb/204Pb","204Pb/206Pb","204Pb/207Pb","204Pb/208Pb"),digits = 6)
+      formatRound(c("distance","208/204Pb","207/204Pb","206Pb/204Pb","204Pb/206Pb","204Pb/207Pb","204Pb/208Pb"),digits = 6)
     
   })
   
@@ -223,10 +223,10 @@ shinyServer(function(input, output, session) {
     CountryFilter <- input$selectCountry
     
     # NEED TO GO AWAY, WRONG PRCESS NEED TO BE REPLACED WITH SD.
-    ind <- dat$`206Pb/204Pb` < 20 & !is.na(dat$Country) & !is.na(dat$`208/204 pb`) & !is.na(dat$`207/204 pb`) & !is.na(dat$`206Pb/204Pb`) & dat$Country %in% CountryFilter
+    ind <- dat$`206Pb/204Pb` < 20 & !is.na(dat$Country) & !is.na(dat$`208/204Pb`) & !is.na(dat$`207/204Pb`) & !is.na(dat$`206Pb/204Pb`) & dat$Country %in% CountryFilter
     dat <- dat[ind,]
 
-    plt1 <- plot_ly(data = dat,type = "scatter",x = ~`206Pb/204Pb`,y = ~`208/204 pb`, mode = "markers",
+    plt1 <- plot_ly(data = dat,type = "scatter",x = ~`206Pb/204Pb`,y = ~`208/204Pb`, mode = "markers",
                     color = ~Country,hoverinfo = 'text',text = ~Country)
     
     plt1 <- add_trace(p = plt1,name= "New Obs",data = obs,x = ~X3,y = ~X1, mode = "markers",
@@ -267,10 +267,10 @@ shinyServer(function(input, output, session) {
     CountryFilter <- input$selectCountry
     
     # NEED TO GO AWAY, WRONG PRCESS NEED TO BE REPLACED WITH SD.
-    ind <- dat$`206Pb/204Pb` < 20 & !is.na(dat$Country) & !is.na(dat$`208/204 pb`) & !is.na(dat$`207/204 pb`) & !is.na(dat$`206Pb/204Pb`) & dat$Country %in% CountryFilter
+    ind <- dat$`206Pb/204Pb` < 20 & !is.na(dat$Country) & !is.na(dat$`208/204Pb`) & !is.na(dat$`207/204Pb`) & !is.na(dat$`206Pb/204Pb`) & dat$Country %in% CountryFilter
     dat <- dat[ind,]
     
-    plt1 <- plot_ly(data = dat,type = "scatter",x = ~`206Pb/204Pb`,y = ~`207/204 pb`, mode = "markers",
+    plt1 <- plot_ly(data = dat,type = "scatter",x = ~`206Pb/204Pb`,y = ~`207/204Pb`, mode = "markers",
                     color = ~Country,hoverinfo = 'text',text = ~Country)
     
     plt1 <- add_trace(p = plt1,name= "New Obs",data = obs,x = ~X3,y = ~X2, mode = "markers",
@@ -313,11 +313,11 @@ shinyServer(function(input, output, session) {
     
 
     # NEED TO GO AWAY, WRONG PRCESS NEED TO BE REPLACED WITH SD.
-    ind <- dat$`206Pb/204Pb` < 20 & !is.na(dat$Country) & !is.na(dat$`208/204 pb`) & !is.na(dat$`207/204 pb`) & !is.na(dat$`206Pb/204Pb`) & dat$Country %in% CountryFilter
+    ind <- dat$`206Pb/204Pb` < 20 & !is.na(dat$Country) & !is.na(dat$`208/204Pb`) & !is.na(dat$`207/204Pb`) & !is.na(dat$`206Pb/204Pb`) & dat$Country %in% CountryFilter
     
     d <- dat[ind,]
     
-    plt3 <- plot_ly(d, x = d$`206Pb/204Pb`, y = d$`208/204 pb`,z = d$`207/204 pb`,
+    plt3 <- plot_ly(d, x = d$`206Pb/204Pb`, y = d$`208/204Pb`,z = d$`207/204Pb`,
                     type = "scatter3d", text = paste("ID: ", d$`ID in database`),
                     mode = "markers", color = d$Country, marker = list(size = 4),
                     colors = colorRampPalette(brewer.pal(9, "Set1"))(length(unique(d$Country))),
@@ -367,10 +367,10 @@ shinyServer(function(input, output, session) {
     # CountryFilter <- input$selectCountry
     RegionFilter <- input$Reg
     # NEED TO GO AWAY, WRONG PRCESS NEED TO BE REPLACED WITH SD.
-    ind <- dat$`206Pb/204Pb` < 20 & !is.na(dat$Country) & !is.na(dat$`208/204 pb`) & !is.na(dat$`207/204 pb`) & !is.na(dat$`206Pb/204Pb`) & dat$Region %in% RegionFilter
+    ind <- dat$`206Pb/204Pb` < 20 & !is.na(dat$Country) & !is.na(dat$`208/204Pb`) & !is.na(dat$`207/204Pb`) & !is.na(dat$`206Pb/204Pb`) & dat$Region %in% RegionFilter
     dat <- dat[ind,]
     
-    # plt1 <- ggplot(dat,aes(x = dat$`206Pb/204Pb`,y = dat$`208/204 pb`,colour = dat$Region)) +
+    # plt1 <- ggplot(dat,aes(x = dat$`206Pb/204Pb`,y = dat$`208/204Pb`,colour = dat$Region)) +
     #   geom_point(aes(shape = factor(dat$Region)))+ # the database plot.
     #   geom_point(data = obs, x = obs[,3],y = obs[,1],colour = list("New obs" = "black"),size = 2) +  #the new observation/s are added
     #   ggtitle("Isotope Ratio 206 by 208") + # Name the graph.
@@ -385,7 +385,7 @@ shinyServer(function(input, output, session) {
     # ggplotly(plt1) %>% # giving the plot as plotly, more interactive and pleasing to the eye...
     #   layout(legend = list(font = list(size = 14)))
     # 
-    plt1 <- plot_ly(data = dat,type = "scatter",x = ~`206Pb/204Pb`,y = ~`208/204 pb`, mode = "markers",
+    plt1 <- plot_ly(data = dat,type = "scatter",x = ~`206Pb/204Pb`,y = ~`208/204Pb`, mode = "markers",
                     color = ~Region,hoverinfo = 'text',text = ~Region)
     
     plt1 <- add_trace(p = plt1,name= "New Obs",data = obs,x = ~X3,y = ~X1, mode = "markers",
@@ -426,10 +426,10 @@ shinyServer(function(input, output, session) {
     # CountryFilter <- input$selectCountry
     RegionFilter <- input$Reg
     # NEED TO GO AWAY, WRONG PRCESS NEED TO BE REPLACED WITH SD.
-    ind <- dat$`206Pb/204Pb` < 20 & !is.na(dat$Country) & !is.na(dat$`208/204 pb`) & !is.na(dat$`207/204 pb`) & !is.na(dat$`206Pb/204Pb`) & dat$Region %in% RegionFilter
+    ind <- dat$`206Pb/204Pb` < 20 & !is.na(dat$Country) & !is.na(dat$`208/204Pb`) & !is.na(dat$`207/204Pb`) & !is.na(dat$`206Pb/204Pb`) & dat$Region %in% RegionFilter
     dat <- dat[ind,]
     
-    # plt2 <- ggplot(dat,aes(x = dat$`206Pb/204Pb`,y = dat$`207/204 pb`,colour = dat$Region)) +
+    # plt2 <- ggplot(dat,aes(x = dat$`206Pb/204Pb`,y = dat$`207/204Pb`,colour = dat$Region)) +
     #   geom_point(aes(shape = factor(dat$Region)))+ # the database plot.
     #   geom_point(data = obs, x = obs[,3],y = obs[,2],colour = list("New obs" = "black"),size = 2) +  #the new observation/s are added
     #   ggtitle("Isotope Ratio 206 by 207") + # Name the graph.
@@ -444,7 +444,7 @@ shinyServer(function(input, output, session) {
     # ggplotly(plt2) %>% # giving the plot as plotly, more interactive and pleasing to the eye...
     #   layout(legend = list(font = list(size = 14)))
     
-    plt1 <- plot_ly(data = dat,type = "scatter",x = ~`206Pb/204Pb`,y = ~`207/204 pb`, mode = "markers",
+    plt1 <- plot_ly(data = dat,type = "scatter",x = ~`206Pb/204Pb`,y = ~`207/204Pb`, mode = "markers",
                     color = ~Region,hoverinfo = 'text',text = ~Region)
     
     plt1 <- add_trace(p = plt1,name= "New Obs",data = obs,x = ~X3,y = ~X2, mode = "markers",
@@ -486,11 +486,11 @@ shinyServer(function(input, output, session) {
     
 
     # NEED TO GO AWAY, WRONG PRCESS NEED TO BE REPLACED WITH SD.
-    ind <- dat$`206Pb/204Pb` < 20 & !is.na(dat$Country) & !is.na(dat$`208/204 pb`) & !is.na(dat$`207/204 pb`) & !is.na(dat$`206Pb/204Pb`) & dat$Region %in% RegionFilter
+    ind <- dat$`206Pb/204Pb` < 20 & !is.na(dat$Country) & !is.na(dat$`208/204Pb`) & !is.na(dat$`207/204Pb`) & !is.na(dat$`206Pb/204Pb`) & dat$Region %in% RegionFilter
     
     d <- dat[ind,]
     
-    plt3 <- plot_ly(d, x = d$`206Pb/204Pb`, y = d$`208/204 pb`,z = d$`207/204 pb`,
+    plt3 <- plot_ly(d, x = d$`206Pb/204Pb`, y = d$`208/204Pb`,z = d$`207/204Pb`,
                     type = "scatter3d", text = paste("ID: ", d$`ID in database`),
                     mode = "markers", color = d$Region, marker = list(size = 4),
                     colors = colorRampPalette(brewer.pal(9, "Set1"))(length(unique(d$Region))),

@@ -5,7 +5,7 @@ library(shiny)
 shinyUI(fluidPage(
   
   # Application title
-  titlePanel("Silver App"),
+  titlePanel("LIA Graphing App"),
   
   # Sidebar with a slider input for number of bins 
   sidebarPanel(
