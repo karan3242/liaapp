@@ -1,21 +1,22 @@
-
 # global
-#install.packages("readxl")
-#install.packages("ggplot2")
-#install.packages("plotly")
-#install.packages("shiny")
-#install.packages("xlsx")
-#install.packages("markdown")
-#install.packages("DT")
 
-library("readxl")
-library("ggplot2")
-library("plotly")
-library("shiny")
-#library("xlsx")
-library("RColorBrewer")
-library("markdown")
-library("DT")
+##### Packages #####
+
+# List of packages needed
+packages <- c("tidyverse", 
+              "readxl", "plotly", 
+              "shiny", "RColorBrewer", 
+              "markdown", "DT")
+
+
+# Install uninstalled Packages and Load the libraries.
+for (pkg in packages) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    install.packages(pkg, dependencies = TRUE)
+  }
+ library(pkg, character.only = TRUE)
+}
+
 
 # changed the database from "a" to "dat" (need to fix that ANNOYING 1st column)
 path <- "database.xlsx"
