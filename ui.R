@@ -155,9 +155,10 @@ shinyUI(fluidPage(
           )
   ),
   
+  ###### Floating Window ######
   
   # fluidPage(style="padding-top: 80px;",
-  #           
+  #
   #           absolutePanel(
   #             top=667, left = 628, width = 400,
   #             draggable = TRUE,
@@ -168,8 +169,6 @@ shinyUI(fluidPage(
   #                        column(2),
   #                        column(3,tableOutput("regionSummary")))
   #               ),
-  #               
-  #             
   #             style = "opacity: 0.92"
   #           ))
   

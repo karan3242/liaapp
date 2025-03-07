@@ -3,25 +3,35 @@
 ##### Packages #####
 
 # List of packages needed
-packages <- c("tidyverse", 
-              "readxl", "plotly", 
-              "shiny", "RColorBrewer", 
-              "markdown", "DT")
-
+packages <- c("tidyverse",
+              "readxl",
+              "plotly",
+              "shiny",
+              "RColorBrewer",
+              "markdown",
+              "DT")
 
 # Install uninstalled Packages and Load the libraries.
 for (pkg in packages) {
   if (!requireNamespace(pkg, quietly = TRUE)) {
     install.packages(pkg, dependencies = TRUE)
   }
- library(pkg, character.only = TRUE)
+  library(pkg, character.only = TRUE)
 }
 
+##### Loading LIA Database #####
 
-# changed the database from "a" to "dat" (need to fix that ANNOYING 1st column)
+# Path to data (Leave this at top level)
 path <- "database.xlsx"
 
-dat <- suppressWarnings(read_excel(path = path))
+#dat <- suppressWarnings(read_excel(path = path))
+dat <- read_excel(path = path, col_types = c(rep("guess", 22), 
+                                             "text", 
+                                             rep("guess", 5)
+                                             )
+                  )
+
+
 # these are all problems we need to address. I took them out because they annoy me.
 # dat <- dat[,-1] # number rows - redundant.
 
@@ -31,9 +41,12 @@ colnames(dat) <- c("Source of data",
                    "Deposit/ Province", "Mine, Ore deposit or sampling spot",
                    "Collected by", "Type", "Type for DB",
                    "Main constituent",	"Main constituent for DB",
-                   "Description/ Mineral", "206Pb/204Pb", "208/204 pb", "207/204 pb", "Date analysed",
+                   "Description/ Mineral", 
+                   "206Pb/204Pb", "208/204 pb", "207/204 pb", 
+                   "Date analysed",
                    "ref. #", "reference", "year", "ID in database", "comments",
-                   "204Pb/206Pb",	"204Pb/208Pb", "204Pb/207Pb", "SuspectedError" ,"medRegion")
+                   "204Pb/206Pb",	"204Pb/208Pb", "204Pb/207Pb", 
+                   "SuspectedError", "medRegion")
 
 dat$`Type for DB` <- tolower(dat$`Type for DB`)
 dat$`Main constituent for DB` <- tolower(dat$`Main constituent for DB`)
