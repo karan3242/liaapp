@@ -24,7 +24,6 @@ for (pkg in packages) {
 # Path to data (Leave this at top level)
 path <- "database.xlsx"
 
-#dat <- suppressWarnings(read_excel(path = path))
 dat <- read_excel(path = path, col_types = c(rep("guess", 22), 
                                              "text", 
                                              rep("guess", 5)
@@ -48,47 +47,59 @@ colnames(dat) <- c("Source of data",
                    "204Pb/206Pb",	"204Pb/208Pb", "204Pb/207Pb", 
                    "SuspectedError", "medRegion")
 
-dat$`Type for DB` <- tolower(dat$`Type for DB`)
-dat$`Main constituent for DB` <- tolower(dat$`Main constituent for DB`)
+dat$`Type for DB` <- tolower(dat$`Type for DB`) # Lower case the Type of DB
+dat$`Main constituent for DB` <- tolower(dat$`Main constituent for DB`) # Lower case 'Main Constitute of DB
 
-dat$SuspectedError[dat$SuspectedError==0]<-"Suspected outlier"
-dat$SuspectedError[dat$SuspectedError==0.5]<-"Not enough data"
-dat$SuspectedError[dat$SuspectedError==1]<- "OK"
+# Suspected Error as labels
+dat$SuspectedError[dat$SuspectedError == 0] <- "Suspected outlier"
+dat$SuspectedError[dat$SuspectedError == 0.5] <- "Not enough data"
+dat$SuspectedError[dat$SuspectedError == 1] <- "OK"
 
-
-main <- unique(dat$`Main constituent for DB`)
-main <- sapply(main,list)
+# Make list of Main Elements
+main <- sapply(unique(dat$`Main constituent for DB`), list)
 names(main)[names(main) == "na"] <- "Not Available"
 
-
-type <- unique(dat$`Type for DB`)
-type <- sapply(type,list)
+# Make list of Source types
+type <- sapply(unique(dat$`Type for DB`), list)
 names(type)[names(type) == "na"] <- "Not Available"
 
+# Make a list out Suspected Errors
+outlier <- sapply(unique(dat$SuspectedError), list)
 
-outlier <- unique(dat$SuspectedError)
-outlier <- sapply(outlier,list)
+# Make a list of Countries
+CountriesVar <- sapply(unique(dat$Country), list)
 
-CountriesVar <- sapply(unique(dat$Country),list)
-RegionsVar <- sapply(unique(dat$Region),list)
-9
-data.base.function <- function(dat){
-  sign1corrected <- function (x, makeplot = FALSE, qcrit = 0.975, ...){
+# Make a list of Regions
+RegionsVar <- sapply(unique(dat$Region), list)
+
+data.base.function <- function(dat) {
+  sign1corrected <- function (x,
+                              makeplot = FALSE,
+                              qcrit = 0.975,
+                              ...) {
     p = ncol(x)
     n = nrow(x)
     x.mad = apply(x, 2, mad)
-    if (any(x.mad == 0)) 
+    if (any(x.mad == 0))
       stop("More than 50% equal values in one or more variables!")
     x.sc <- scale(x, apply(x, 2, median), x.mad)
-    med <- apply(x,2,median) # my addition (plus the condition...)
-    if(sum(apply(x,1,function(x){sum(x == med)})==3) > 0){x.sc[which(apply(x,1,function(x){sum(x == med)})==3),1] <- x.sc[which(apply(x,1,function(x){sum(x == med)})==3),1]+0.0000001}
-    xs <- x.sc/sqrt(apply(x.sc^2, 1, sum))
+    med <- apply(x, 2, median) # my addition (plus the condition...)
+    if (sum(apply(x, 1, function(x) {
+      sum(x == med)
+    }) == 3) > 0) {
+      x.sc[which(apply(x, 1, function(x) {
+        sum(x == med)
+      }) == 3), 1] <- x.sc[which(apply(x, 1, function(x) {
+        sum(x == med)
+      }) == 3), 1] + 0.0000001
+    }
+    xs <- x.sc / sqrt(apply(x.sc ^ 2, 1, sum))
     xs.evec <- svd(xs)$v
     xs.pc <- x.sc %*% xs.evec
-    xs.pcscal <- apply(xs.pc, 2, mad)^2
+    xs.pcscal <- apply(xs.pc, 2, mad) ^ 2
     xs.pcorder <- order(xs.pcscal, decreasing = TRUE)
     p1 = min(p - 1, n - 1)
-    covm1 = xs.evec[, xs.pcorder[1:p1]] %*% diag(1/xs.pcscal[xs.pcorder[1:p1]]) %*% 
+    covm1 = xs.evec[, xs.pcorder[1:p1]] %*% diag(1 / xs.pcscal[xs.pcorder[1:p1]]) %*%
       t(xs.evec[, xs.pcorder[1:p1]])
     x.dist = sqrt(mahalanobis(x.sc, rep(0, p), covm1, inverted = TRUE))
     const <- sqrt(qchisq(qcrit, p1))
@@ -98,16 +109,22 @@ data.base.function <- function(dat){
       on.exit(par(op))
       plot(x.dist, xlab = "Index", ylab = "Distance", ...)
       abline(h = const)
-      plot(wfinal01, xlab = "Index", ylab = "Final 0/1 weight", 
-           ylim = c(0, 1), ...)
+      plot(
+        wfinal01,
+        xlab = "Index",
+        ylab = "Final 0/1 weight",
+        ylim = c(0, 1),
+        ...
+      )
     }
-    list(wfinal01 = wfinal01, x.dist = x.dist, const = const)
+    list(wfinal01 = wfinal01,
+         x.dist = x.dist,
+         const = const)
   }
+  
   # the euclidean function.
-  euc<- function(x,y){
-    
-    sqrt(sum((x-y)^2))
-    
+  euc <- function(x, y) {
+    sqrt(sum((x - y) ^ 2))
   }
   # a basic demand for the function to worl prperly is the existence of the isotopes, and a country.
   ourdat <- dat[!is.na(dat$`206Pb/204Pb`) & !is.na(dat$`208/204 pb`) & !is.na(dat$`207/204 pb`) & !is.na(dat$Country),]
