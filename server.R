@@ -291,7 +291,7 @@ shinyServer(
                                     color_palette,
                                     y_labels) {
       # Generate color palette for groups (Country or Region)
-      colors <- colorRampPalette(brewer.pal(12, "Paired"))(length(unique(dat[[color_group]])))
+      colors <- colorRampPalette(brewer.pal(12, "Set3"))(length(unique(dat[[color_group]])))
       
       # Helper function to create scatter plots
       create_plot <- function(y_column, obs_y) {
@@ -430,7 +430,7 @@ shinyServer(
                              dat[[filter_column]] %in% filter_values, ]
       
       # Generate color palette
-      colors <- colorRampPalette(brewer.pal(9, "Set1"))(length(unique(filtered_data[[color_column]])))
+      colors <- colorRampPalette(brewer.pal(9, "Set3"))(length(unique(filtered_data[[color_column]])))
       
       # Create the 3D scatter plot
       plt3 <- plot_ly(
