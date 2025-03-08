@@ -9,20 +9,23 @@
 
 library(shiny)
 
-# Define server logic required to draw a histogram
+# Define server logic
+
 shinyServer(function(input, output, session) {
-  # the updating of the base file.
+  
+  ##### Base File Update #####
+  
   update_function <- reactive({
-    if (is.null(input$base_file)) {
-      new_dat <- NULL
-    } else {
-      update_path <- input$base_file
+    req(input$base_file)  # Ensure the file input is not null
+    
+    
+    temp_file <- paste0(update_path$datapath, ".xlsx")
+    file.rename(update_path$datapath, temp_file)
       
-      file.rename(update_path$datapath,
-                  paste(update_path$datapath, ".xlsx", sep = ""))
-      
-      new_dat <- suppressWarnings(read_excel(
-        path = paste(update_path$datapath, ".xlsx", sep = ""),
+    # Attempt to read the Excel file
+    new_dat <- tryCatch({
+      read_excel(
+        path = temp_file,
         col_names = TRUE,
         col_types = c(
           rep("text", 14),
@@ -35,14 +38,23 @@ shinyServer(function(input, output, session) {
           "text",
           rep("skip", 10)
         )
-      ))
+      )
+    }, error = function(e) {
+      showNotification("Error reading the Excel file!", type = "error")
+      NULL
+    })
       
-      # the updating function on the new file we were given.
-      new_dat <- data.base.function(new_dat)
-      
+    # Proceed only if data was read successfully
+    if (!is.null(new_dat)) {
+      new_dat <- tryCatch({
+        data.base.function(new_dat)
+      }, error = function(e) {
+        showNotification("Error processing the data!", type = "error")
+        NULL
+      })
     }
     
-    new_dat
+    return(new_dat)
     
   })
   
@@ -52,24 +64,17 @@ shinyServer(function(input, output, session) {
   })
   
   output$download_new_dat <- downloadHandler(
-    filename = "database.xlsx",
+    filename = function() {
+      paste0("processed_data_", Sys.Date(), ".xlsx")  # Adds a date for uniqueness
+    },
     content = function(file) {
-      xlsx::write.xlsx(
-        file = file,
-        x = data.frame(update_function()),
-        sheetName = "data",
-        row.names = FALSE,
-        showNA = FALSE
-      )
+      req(update_function())  # Ensure data is available before proceeding
+      openxlsx::write.xlsx(update_function(), file, sheetName = "data")
     }
-    
   )
+
   
-  
-  
-  
-  
-  # function to find wuclidean distance in a 3d graph.
+  # function to find euclidean distance in a 3d graph.
   euc <- function(x, y) {
     sqrt(sum((x - y) ^ 2))
     
