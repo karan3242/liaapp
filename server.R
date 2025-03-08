@@ -65,7 +65,7 @@ shinyServer(function(input, output, session) {
   
   output$download_new_dat <- downloadHandler(
     filename = function() {
-      paste0("processed_data_", Sys.Date(), ".xlsx")  # Adds a date for uniqueness
+      paste0("database.xlsx")
     },
     content = function(file) {
       req(update_function())  # Ensure data is available before proceeding
@@ -77,25 +77,23 @@ shinyServer(function(input, output, session) {
   # function to find euclidean distance in a 3d graph.
   euc <- function(x, y) {
     sqrt(sum((x - y) ^ 2))
-    
   }
   
   # Added filtering the data.
   datChanges <- reactive({
     errorFilter <- input$errorFilter
-    
     ConstFilter <- input$ConstFilter
-    
     typeFilter <- input$typeFilter
     
-    ind <- c(dat$SuspectedError %in% errorFilter) &
-      dat$`Main constituent for DB` %in% ConstFilter &
-      dat$`Type for DB` %in% typeFilter
+    dat <- dat[!is.na(dat$SuspectedError), ] # Removes any potential NAs form Updated data file
+    
+    ind <- (dat$SuspectedError %in% errorFilter) &
+      (dat$`Main constituent for DB` %in% ConstFilter) &
+      (dat$`Type for DB` %in% typeFilter)
     
     datChanges <- dat[ind, ]
     
-    datChanges
-    
+    return(datChanges)
     
   })
   

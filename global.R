@@ -58,11 +58,25 @@ dat$SuspectedError[dat$SuspectedError == 1] <- "OK"
 
 # Make list of Main Elements
 main <- sapply(unique(dat$`Main constituent for DB`), list)
-names(main)[names(main) == "na"] <- "Not Available"
+names(main) <- ifelse(is.na(names(main)) | tolower(names(main)) == "na", 
+                      "Not Available", 
+                      names(main))
+
+if ("Not Available" %in% names(main)) {
+  main[["Not Available"]] <- unique(unlist(main[names(main) == "Not Available"]))
+  main <- main[!duplicated(names(main))]  # Remove duplicates
+}
 
 # Make list of Source types
 type <- sapply(unique(dat$`Type for DB`), list)
-names(type)[names(type) == "na"] <- "Not Available"
+names(type) <- ifelse(is.na(names(type)) | tolower(names(type)) == "na", 
+                      "Not Available", 
+                      names(type))
+
+if ("Not Available" %in% names(type)) {
+  type[["Not Available"]] <- unique(unlist(type[names(type) == "Not Available"]))
+  type <- type[!duplicated(names(type))]  # Remove duplicates
+}
 
 # Make a list out Suspected Errors
 outlier <- sapply(unique(dat$SuspectedError), list)
