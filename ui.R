@@ -203,19 +203,7 @@ shinyUI(fluidPage(
         
         column(
           width = 12,
-          plotlyOutput("obsGraph2"),
-          br(),
-          br(),
-          br(),
-          br(),
-          br(),
-          br(),
-          br(),
-          br(),
-          br(),
-          br(),
-          br(),
-          plotlyOutput("obsGraph1"),
+          plotlyOutput("obsGraph"),
           align = "center"
         )
         
@@ -228,19 +216,7 @@ shinyUI(fluidPage(
         
         column(
           width = 12,
-          plotlyOutput("regGraph2"),
-          br(),
-          br(),
-          br(),
-          br(),
-          br(),
-          br(),
-          br(),
-          br(),
-          br(),
-          br(),
-          br(),
-          plotlyOutput("regGraph1"),
+          plotlyOutput("regGraph"),
           align = "center"
         )
         
