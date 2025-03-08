@@ -1,13 +1,11 @@
-
-
 library(shiny)
 
-# Define UI for application that draws a histogram
 shinyUI(fluidPage(
-  # Application title
+  ##### Application Title #####
   titlePanel("LIA Graphing App"),
   
-  # Sidebar with a slider input for number of bins
+  
+  ##### Side Bar #####
   sidebarPanel(
     actionButton(inputId = "update_file", label = "Update File"),
     conditionalPanel(
@@ -191,40 +189,37 @@ shinyUI(fluidPage(
     
   ),
   
-  # Show a plot of the generated distribution
+  ##### Main Panel #####
   mainPanel(
+    ##### Distance Table #####
     tabsetPanel(
       type = "tabs",
-      
       tabPanel("Distance Table", dataTableOutput("dis")),
       
+      ##### 2D Countries Graph #####
       tabPanel(
         "2d Graphs - Countries",
-        
         column(
           width = 12,
           plotlyOutput("obsGraph"),
           align = "center"
-        )
-        
-      ),
-      
+        )),
+
+      ##### 3D Countries Graph #####      
       tabPanel("3d Graphs - Countries", plotlyOutput("obsGraph3d")),
       
+      ##### 2D Regions Graph #####
       tabPanel(
         "2d Graphs - Region",
-        
         column(
           width = 12,
           plotlyOutput("regGraph"),
           align = "center"
-        )
-        
-      ),
+        )),
       
+      ##### 3D Regions Graph #####
       tabPanel("3d Graphs - Region", plotlyOutput("regGraph3d"))
-    )
-  ),
+    )),
   
   ###### Floating Window ######
   
@@ -242,7 +237,5 @@ shinyUI(fluidPage(
   #               ),
   #             style = "opacity: 0.92"
   #           ))
-  
-  
-  
+
 ))
