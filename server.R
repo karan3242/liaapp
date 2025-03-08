@@ -282,6 +282,8 @@ shinyServer(function(input, output, session) {
   
   ##### Plot Helper function #####
   
+  
+  
   ##### 2D Countries Graph #####
   
   # the first 2d graph.
@@ -316,76 +318,132 @@ shinyServer(function(input, output, session) {
     # Filter by Country
     CountryFilter <- input$selectCountry
     
-    # New Standard Deviation Filtering for `206Pb/204Pb`
+    # Apply Standard Deviation Filtering for `206Pb/204Pb`
     mean206 <- mean(dat$`206Pb/204Pb`, na.rm = TRUE)
     sd206 <- sd(dat$`206Pb/204Pb`, na.rm = TRUE)
     
-    ind <- dat$`206Pb/204Pb` >= (mean206 - 3 * sd206) &
-      dat$`206Pb/204Pb` <= (mean206 + 3 * sd206) &
-      !is.na(dat$Country) & dat$Country %in% CountryFilter
+    dat <- dat[
+      dat$`206Pb/204Pb` >= (mean206 - 3 * sd206) &
+        dat$`206Pb/204Pb` <= (mean206 + 3 * sd206) &
+        !is.na(dat$Country) & dat$Country %in% CountryFilter, 
+    ]
     
-    dat <- dat[ind, ]
-    
-    # Get unique colors for the countries
+    # Generate unique colors for countries
     country_colors <- colorRampPalette(brewer.pal(12, "Paired"))(length(unique(dat$Country)))
     
-    # First subplot (208/204Pb vs 206Pb/204Pb)
-    plt1 <- plot_ly(
-      data = dat,
-      type = "scatter",
-      x = ~ `206Pb/204Pb`,
-      y = ~ `208/204Pb`,
-      mode = "markers",
-      color = ~ Country,
-      hoverinfo = 'text',
-      text = ~ Country,
-      colors = country_colors
-    ) %>%
-      add_trace(
-        p = .,
-        name = "New Obs",
-        data = obs,
-        x = ~ X3,
-        y = ~ X1,
+    # Helper function to create plots
+    create_plot <- function(y_column, obs_y) {
+      plot_ly(
+        data = dat,
+        type = "scatter",
+        x = ~ `206Pb/204Pb`,
+        y = as.formula(paste0("~ `", y_column, "`")),
         mode = "markers",
-        marker = list(color = "black", size = 7)
+        color = ~ Country,
+        hoverinfo = 'text',
+        text = ~ Country,
+        colors = country_colors
       ) %>%
-      layout(
-        xaxis = list(title = "206Pb/204Pb"),
-        yaxis = list(title = "208/204Pb")
-      )
+        add_trace(
+          name = "New Obs",
+          data = obs,
+          x = ~ X3,
+          y = as.formula(paste0("~ X", obs_y)),
+          mode = "markers",
+          marker = list(color = "black", size = 7)
+        ) %>%
+        layout(
+          yaxis = list(title = y_column)
+        )
+    }
     
-    # Second subplot (207/204Pb vs 206Pb/204Pb)
-    plt2 <- plot_ly(
-      data = dat,
-      type = "scatter",
-      x = ~ `206Pb/204Pb`,
-      y = ~ `207/204Pb`,
-      mode = "markers",
-      color = ~ Country,
-      hoverinfo = 'text',
-      text = ~ Country,
-      colors = country_colors
-    ) %>%
-      add_trace(
-        p = .,
-        name = "New Obs",
-        data = obs,
-        x = ~ X3,
-        y = ~ X2,
-        mode = "markers",
-        marker = list(color = "black", size = 7)
-      ) %>%
-      layout(
-        xaxis = list(title = "206Pb/204Pb"),
-        yaxis = list(title = "207/204Pb")
-      )
-    
-    # Combine both plots into a single figure with shared axis labels for countries
-    subplot(plt1, plt2, nrows = 2, shareX = TRUE, shareY = TRUE, titleX = TRUE, titleY = TRUE)
+    # Generate subplots
+    subplot(
+      create_plot("208/204Pb", 1), 
+      create_plot("207/204Pb", 2), 
+      nrows = 2, shareX = TRUE, titleX = TRUE
+    )
   })
   
-
+  ###### 2D Regioncal Plot #######
+  
+  output$regGraph <- renderPlotly({
+    
+    dat <- datChanges()
+    
+    # Handling input observations (single and table)
+    if (input$Datatype == "0") {
+      obs <- data.frame(
+        X1 = input$x1,
+        X2 = input$x2,
+        X3 = input$x3,
+        Region = "New Obs"
+      )
+    } else {
+      clnm <- as.numeric(c(input$H1, input$H2, input$H3))
+      inFile <- input$file1
+      
+      if (is.null(inFile)) return(NULL)
+      
+      tab <- read.csv(inFile$datapath)
+      names(tab) <- c("ID", "X1", "X2", "X3")
+      
+      obs <- data.frame(
+        X1 = tab[, clnm[1]],
+        X2 = tab[, clnm[2]],
+        X3 = tab[, clnm[3]],
+        Region = as.character(tab$ID)
+      )
+    }
+    
+    # Apply filtering conditions
+    dat <- dat[
+      dat$`206Pb/204Pb` < 20 &
+        !is.na(dat$Country) &
+        !is.na(dat$`208/204Pb`) &
+        !is.na(dat$`207/204Pb`) &
+        !is.na(dat$`206Pb/204Pb`) & 
+        dat$Region %in% input$Reg, 
+    ]
+    
+    # Generate color palette for regions
+    region_colors <- colorRampPalette(brewer.pal(12, "Paired"))(length(unique(dat$Region)))
+    
+    # Helper function to create scatter plots
+    create_plot <- function(y_column, obs_y) {
+      plot_ly(
+        data = dat,
+        type = "scatter",
+        x = ~ `206Pb/204Pb`,
+        y = as.formula(paste0("~ `", y_column, "`")),
+        mode = "markers",
+        color = ~ Region,
+        hoverinfo = 'text',
+        text = ~ Region,
+        colors = region_colors
+      ) %>%
+        add_trace(
+          name = "New Obs",
+          data = obs,
+          x = ~ X3,
+          y = as.formula(paste0("~ X", obs_y)),
+          mode = "markers",
+          marker = list(color = "black", size = 7)
+        ) %>%
+        layout(
+          yaxis = list(title = y_column)
+        )
+    }
+    
+    # Generate subplots
+    subplot(
+      create_plot("208/204Pb", 1), 
+      create_plot("207/204Pb", 2), 
+      nrows = 2, shareX = TRUE, titleX = TRUE
+    )
+  })
+  
+  
   ##### 3D Country Plot ######
   
   output$obsGraph3d <- renderPlotly({
@@ -478,104 +536,6 @@ shinyServer(function(input, output, session) {
     
     
   })
-  
-  ###### 2D Regioncal Plot #######
-  
-  output$regGraph <- renderPlotly({
-    
-    dat <- datChanges()
-    
-    # The observations (both single and table)
-    if (input$Datatype == "0") {
-      obs <- t(c(input$x1, input$x2, input$x3))
-      obs <- data.frame(matrix(obs, ncol = 3, byrow = FALSE))
-      obs$Region <- "New Obs"
-    } else {
-      clnm <- as.numeric(c(input$H1, input$H2, input$H3))
-      inFile <- input$file1
-      
-      if (is.null(inFile)) return(NULL)
-      
-      tab <- read.csv(inFile$datapath)
-      names(tab) <- c("ID", "X1", "X2", "X3")
-      obs <- cbind(
-        "208/204" = tab[, clnm[1]],
-        "207/204" = tab[, clnm[2]],
-        "206/204" = tab[, clnm[3]]
-      )
-      
-      # Adjust the data
-      obs <- data.frame(matrix(obs, ncol = 3, byrow = FALSE))
-      obs$Region <- as.character.factor(tab$ID)
-    }
-    
-    RegionFilter <- input$Reg
-    
-    # Filter by Region and other conditions
-    ind <- dat$`206Pb/204Pb` < 20 &
-      !is.na(dat$Country) &
-      !is.na(dat$`208/204Pb`) &
-      !is.na(dat$`207/204Pb`) &
-      !is.na(dat$`206Pb/204Pb`) & dat$Region %in% RegionFilter
-    dat <- dat[ind, ]
-    
-    # Generate color palette for the regions
-    region_colors <- colorRampPalette(brewer.pal(12, "Paired"))(length(unique(dat$Region)))
-    
-    # First subplot (208/204Pb vs 206Pb/204Pb)
-    plt1 <- plot_ly(
-      data = dat,
-      type = "scatter",
-      x = ~ `206Pb/204Pb`,
-      y = ~ `208/204Pb`,
-      mode = "markers",
-      color = ~ Region,
-      hoverinfo = 'text',
-      text = ~ Region,
-      colors = region_colors
-    ) %>%
-      add_trace(
-        p = .,
-        name = "New Obs",
-        data = obs,
-        x = ~ X3,
-        y = ~ X1,
-        mode = "markers",
-        marker = list(color = "black", size = 7)
-      ) %>%
-      layout(
-        xaxis = list(title = "206Pb/204Pb"),
-        yaxis = list(title = "208/204Pb")
-      )
-    
-    plt2 <- plot_ly(
-      data = dat,
-      type = "scatter",
-      x = ~ `206Pb/204Pb`,
-      y = ~ `207/204Pb`,
-      mode = "markers",
-      color = ~ Region,
-      hoverinfo = 'text',
-      text = ~ Region,
-      colors = region_colors
-    ) %>%
-      add_trace(
-        p = .,
-        name = "New Obs",
-        data = obs,
-        x = ~ X3,
-        y = ~ X2,
-        mode = "markers",
-        marker = list(color = "black", size = 7)
-      ) %>%
-      layout(
-        xaxis = list(title = "206Pb/204Pb"),
-        yaxis = list(title = "207/204Pb")
-      )
-    
-    subplot(plt1, plt2, nrows = 2, shareX = TRUE, shareY = TRUE, titleX = TRUE, titleY = TRUE)
-  })
-    
   
   
   ###### 3D Regioinal Plot #####

@@ -1,11 +1,11 @@
 library(shiny)
 
 shinyUI(fluidPage(
-  ##### Application Title #####
+  #### Application Title ####
   titlePanel("LIA Graphing App"),
   
   
-  ##### Side Bar #####
+  #### Side Bar ####
   sidebarPanel(
     actionButton(inputId = "update_file", label = "Update File"),
     conditionalPanel(
@@ -189,14 +189,14 @@ shinyUI(fluidPage(
     
   ),
   
-  ##### Main Panel #####
+  #### Main Panel ####
   mainPanel(
-    ##### Distance Table #####
+    ###### Distance Table #####
     tabsetPanel(
       type = "tabs",
       tabPanel("Distance Table", dataTableOutput("dis")),
       
-      ##### 2D Countries Graph #####
+    ###### 2D Countries Graph #####
       tabPanel(
         "2d Graphs - Countries",
         column(
@@ -205,10 +205,10 @@ shinyUI(fluidPage(
           align = "center"
         )),
 
-      ##### 3D Countries Graph #####      
+    ###### 3D Countries Graph #####      
       tabPanel("3d Graphs - Countries", plotlyOutput("obsGraph3d")),
       
-      ##### 2D Regions Graph #####
+    ###### 2D Regions Graph ######
       tabPanel(
         "2d Graphs - Region",
         column(
@@ -217,11 +217,11 @@ shinyUI(fluidPage(
           align = "center"
         )),
       
-      ##### 3D Regions Graph #####
+    ###### 3D Regions Graph ######
       tabPanel("3d Graphs - Region", plotlyOutput("regGraph3d"))
     )),
   
-  ###### Floating Window ######
+  ##### Floating Window (Commented Out) ######
   
   # fluidPage(style="padding-top: 80px;",
   #
