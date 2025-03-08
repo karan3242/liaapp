@@ -327,7 +327,7 @@ shinyServer(function(input, output, session) {
     dat <- dat[ind, ]
     
     # Get unique colors for the countries
-    country_colors <- colorRampPalette(RColorBrewer::brewer.pal(12, "Paired"))(length(unique(dat$Country)))
+    country_colors <- colorRampPalette(brewer.pal(12, "Paired"))(length(unique(dat$Country)))
     
     # First subplot (208/204Pb vs 206Pb/204Pb)
     plt1 <- plot_ly(
@@ -520,7 +520,7 @@ shinyServer(function(input, output, session) {
     dat <- dat[ind, ]
     
     # Generate color palette for the regions
-    region_colors <- colorRampPalette(RColorBrewer::brewer.pal(12, "Paired"))(length(unique(dat$Region)))
+    region_colors <- colorRampPalette(brewer.pal(12, "Paired"))(length(unique(dat$Region)))
     
     # First subplot (208/204Pb vs 206Pb/204Pb)
     plt1 <- plot_ly(
