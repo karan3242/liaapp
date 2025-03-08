@@ -73,19 +73,21 @@ shinyServer(function(input, output, session) {
     }
   )
 
-  
-  # function to find euclidean distance in a 3d graph.
+  ##### Distance Table #####
+ 
+  # Function to find euclidean distance in a 3d graph.
   euc <- function(x, y) {
     sqrt(sum((x - y) ^ 2))
   }
   
-  # Added filtering the data.
+  # Data Filters
   datChanges <- reactive({
     errorFilter <- input$errorFilter
     ConstFilter <- input$ConstFilter
     typeFilter <- input$typeFilter
     
-    dat <- dat[!is.na(dat$SuspectedError), ] # Removes any potential NAs form Updated data file
+    # Removes any potential NAs form Updated data file
+    dat <- dat[!is.na(dat$SuspectedError), ]
     
     ind <- (dat$SuspectedError %in% errorFilter) &
       (dat$`Main constituent for DB` %in% ConstFilter) &
@@ -94,51 +96,78 @@ shinyServer(function(input, output, session) {
     datChanges <- dat[ind, ]
     
     return(datChanges)
-    
   })
-  
+
+  # Euclidean Reactive Distance Table
   tableEuclidean <- reactive({
+    
+    req(datChanges())
+    
     dat <- datChanges()
     
     if (input$Datatype == "0") {
       # the given observations.
       obs <- c(input$x1, input$x2, input$x3)
-      # the database observations.
-      datobs <- cbind(dat$`208/204Pb`, dat$`207/204Pb`, dat$`206Pb/204Pb`)
-      # run "euc" on the table with a refrence to the given observation, and give the 5 closest observations.
+      
+      # Check for missing values in obs
+      if (any(is.na(obs))) {
+        stop("Some input values (x1, x2, x3) are missing. Please enter valid numbers.")
+      }
+      
+      # Extract and clean database observations
+      datobs <- cbind(dat$`208/204Pb`, dat$`207/204Pb`, dat$`206Pb/204Pb`) %>% 
+        na.omit(datobs)  # Remove rows with NA values
+      
+      # Compute Euclidean distances
       distance <- apply(
         X = datobs,
         MARGIN = 1,
         FUN = euc,
         x = obs
       )
-      place <- order(distance, decreasing = FALSE)[1:input$numobs]
       
+      # Determine how many closest observations to return
+      numobs <- min(input$numobs, length(distance))
+      
+      # Find the closest observations
+      place <- order(distance, decreasing = FALSE)[1:numobs]
+      
+      # Ensure `dat` is properly subsetted (only include complete cases)
       tabeuc <- cbind(distance, dat)[place, ]
       
-      # print out the following data on the database observations.
-      tabeuc
+      # Print the selected observations
+      print(tabeuc)
       
     } else {
-      clnm <- as.numeric(c(input$H1, input$H2, input$H3)) # in case the columns are given in the wrong order.
-      # the file - a .csv file with 4 columns.
+      # In case the columns are given in the wrong order.
+      # Ensure the correct column indices are selected
+      clnm <- as.numeric(c(input$H1, input$H2, input$H3))
+      
+      # Validate input file
       inFile <- input$file1
+      if (is.null(inFile)) return(NULL)
       
-      if (is.null(inFile))
-        return(NULL)
-      
+      # Read CSV file
       tab <- read.csv(inFile$datapath)
-      # the right order of the table.
+      
+      # Reorder columns based on user input
       tab1 <- cbind(
         "208/204" = tab[, clnm[1]],
         "207/204" = tab[, clnm[2]],
         "206/204" = tab[, clnm[3]]
       )
+      
+      # Extract sample IDs
       ids <- as.character(tab[, 1])
-      # this function copies the process of asingle observation.
+      
+      # this function copies the process of a single observation.
       eucTable <- function(vec) {
         datobs <- cbind(dat$`208/204Pb`, dat$`207/204Pb`, dat$`206Pb/204Pb`)
         
+        # Handle missing values
+        datobs <- na.omit(datobs)
+        
+        # Compute Euclidean distances
         distance <- apply(
           X = datobs,
           MARGIN = 1,
@@ -146,27 +175,35 @@ shinyServer(function(input, output, session) {
           x = vec
         )
         
-        place <- order(distance, decreasing = FALSE)[1:input$numobs]
+        # Ensure valid numobs value
+        numobs <- min(input$numobs, length(distance))
+        
+        # Find closest observations
+        place <- order(distance, decreasing = FALSE)[1:numobs]
         
         return(cbind(distance, dat)[place, ])
         
       }
-      # now the process is repeated on every given observation.
-      tabeuc <- NULL
       
-      for (i in 1:nrow(tab1)) {
+      # Apply function to all observations using lapply (faster than for-loop)
+      tabeuc_list <- lapply(seq_len(nrow(tab1)), function(i) {
         obs <- tab1[i, ]
-        
         tmp <- cbind("ID" = rep(ids[i], input$numobs), eucTable(obs))
-        
-        tabeuc <- rbind(tabeuc, tmp)
-      }
+        return(tmp)
+      })
       
-      tabeuc
+      # Combine results into a single data frame
+      tabeuc <- do.call(rbind, tabeuc_list)
+      
+      # Print final table
+      print(tabeuc)
     }
     
   })
-  # the code that allows us to update the country and region filters.
+  
+  ##### Countries and Regions Filter #####
+  
+  # The code that allows to update the country and region filters.
   observeEvent(input$update, {
     # if one observation is given.
     tabeuc <- tableEuclidean()
@@ -193,7 +230,8 @@ shinyServer(function(input, output, session) {
     updateCheckboxGroupInput(session, inputId = "Reg", selected = NA)
   })
   
-  # the summary tables
+  ###### Floating Summary Table (Redundant Code) #####
+  # the summary tables For the 
   output$countrySummary <- renderTable({
     tabeuc <- tableEuclidean()
     table("Country" = tabeuc$Country)
@@ -207,36 +245,41 @@ shinyServer(function(input, output, session) {
     
   })
   
+  ##### Rendering Table #####
   # the table output of the closest database observations to the given observations.
   output$dis <- renderDataTable({
+    
+    req(datChanges(), tableEuclidean())
+    
     dat <- datChanges()
-    # if one observation is given.
     tabeuc <- tableEuclidean()
+    
+    # Validate that the table isn't empty
+    validate(
+      need(nrow(tabeuc) > 0, "No matching data found. Try adjusting the filters.")
+    )
+    
+    # Define numeric columns for rounding
+    numeric_cols <- intersect(
+      c("distance", "208/204Pb", "207/204Pb", "206Pb/204Pb", 
+        "204Pb/206Pb", "204Pb/207Pb", "204Pb/208Pb"), 
+      colnames(tabeuc)
+    )
     
     datatable(
       tabeuc,
       options = list(
         lengthMenu = list(c(5, 10, 15, 20), c('5', '10', '15', '20')),
-        pageLength = 15,
+        pageLength = 10,
         paging = TRUE,
         searching = TRUE
       ),
-      rownames = rep("", times = nrow(tabeuc))
+      rownames = FALSE
     ) %>%
-      formatRound(
-        c(
-          "distance",
-          "208/204Pb",
-          "207/204Pb",
-          "206Pb/204Pb",
-          "204Pb/206Pb",
-          "204Pb/207Pb",
-          "204Pb/208Pb"
-        ),
-        digits = 6
-      )
-    
-  })
+      formatRound(numeric_cols, digits = 6)
+    })
+  
+  ##### 2D Countries Graph #####
   
   # the first 2d graph.
   output$obsGraph1 <- renderPlotly({
